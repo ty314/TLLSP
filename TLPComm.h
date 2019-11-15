@@ -62,6 +62,15 @@ deleteTLPComm(TLPComm_t **comm);
  */
 uint8_t
 TLPCOMMDecode(TLPComm_t *comm);
+	  
+/**
+ * @brief  Interrupt Service Routine.
+ *         Only put byte received into TLLFifo.
+ * @c      Byte received through interrupt
+ * @return The byte put, or -1 when TLLFifo was full.
+ */
+int16_t
+TLPCOMMISR(TLPComm_t *comm, uint8_t c);
 
 #ifdef __cplusplus
   }
