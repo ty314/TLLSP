@@ -3,7 +3,7 @@
  * All rights reserved
  *
  * @file    TLLFifo.h
- * @author  D.T
+ * @author  LL.T
  * @version 1.0.0
  * @date    2018/05/27
  * @brief   
