@@ -31,7 +31,7 @@
 #define TLLNK_MARK 0x7E  // Packet head mark
 #define TLLNK_VERIFY_OFFSET 1  // Byte calc Checksum from
 #define TLLNK_HEADS_VERIFY  6  // Calc + Seq + Sys + Dev + Tag + Len  
-#define TLLNK_MIN_SIZE      9  // Size no payload included
+#define TLLNK_MIN_SIZE      9  // Size no value included
 
 /**
  * @brief Based on FSM, decompose parse of packet into several stable status.
@@ -61,7 +61,7 @@ typedef struct
 	uint8_t Dev;     // Sender device
 	uint8_t Tag;     // Tag
 	uint8_t Len;     // Length
-	uint8_t *ValPtr; // Value, remember to initialize the pointer.
+	uint8_t *ValPtr; // Value
 	uint16_t Checksum;
 }TLLNKPacket_t;
 
