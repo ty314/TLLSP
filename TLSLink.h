@@ -35,15 +35,16 @@
 typedef struct 
 {
 	/* Protocol, must send in order as follow. */
-	uint8_t Mark;       // Head mark
-	uint16_t Checksum;  // If Calc is non-zero, calc Checksum by Crc16/Modbus,	
-	uint8_t Calc;       // else just filled with Tag(High) and Len(Low).
-	uint8_t Seq;        // Sequence
-	uint8_t Sys;        // Sender system
-	uint8_t Dev;        // Sender device
-	uint8_t Tag;        // Tag
-	uint8_t Len;        // Length
-	uint8_t *ValPtr;    // Value
+	uint8_t Mark;     // Head mark
+	uint8_t CKL;      // Divide checksum consider alignment of structure,
+	uint8_t CKH;      // if Calc is non-zero, calc checksum by Crc16/Modbus,	
+	uint8_t Calc;     // else just filled with Tag(CKL) and Len(CKH).
+	uint8_t Seq;      // Sequence
+	uint8_t Sys;      // Sender system
+	uint8_t Dev;      // Sender device
+	uint8_t Tag;      // Tag
+	uint8_t Len;      // Length
+	uint8_t *ValPtr;  // Value
 }TLSLink_t;
 
 /**
