@@ -28,126 +28,72 @@
 /**
  * @brief Macros of packet protocol
  */		
-#define TLSLNK_MARK 0x7E  // Packet head mark
-#define TLSLNK_VERIFY_OFFSET 1  // Byte calc Checksum from
-#define TLSLNK_HEADS_VERIFY  6  // Calc + Seq + Sys + Dev + Tag + Len  
-#define TLSLNK_MIN_SIZE      9  // Size no value included
+#define TLSLNK_MARK 0x7E  // Head mark  
 
 /**
- * @brief Based on FSM, decompose parse of packet into several stable status.
+ * @brief Based on FSM, decompose parse into several stable status.
  */		
 typedef enum {
-	TLSLNK_FSM_MARK = 0,
-	TLSLNK_FSM_CALC,
-	TLSLNK_FSM_SEQ,
-	TLSLNK_FSM_SYS,
-	TLSLNK_FSM_DEV,
-	TLSLNK_FSM_TAG,
-	TLSLNK_FSM_LEN,
-	TLSLNK_FSM_VAL,
-	TLSLNK_FSM_CKL,
-	TLSLNK_FSM_CKH
-}TLSLNKFSMStatus;
+	TLSLNK_STA_MARK = 0,
+	TLSLNK_STA_RESVA,
+	TLSLNK_STA_RESVB,
+	TLSLNK_STA_SEQ,
+	TLSLNK_STA_SYS,
+	TLSLNK_STA_DEV,
+	TLSLNK_STA_TAG,
+	TLSLNK_STA_LEN,
+	TLSLNK_STA_VAL,
+	
+	/* Got complete packet, do nothing until processed 
+	   and switch to TLSLNK_STA_MARK. */
+	TLSLNK_STA_FINISH
+}TLSLNKStatus;
 
 /**
- * @brief Packet protocol
+ * @brief Data structure of TLSLink, as well as packet protocol.
  */	
 typedef struct 
 {
-	uint8_t Mark;    // Packet head mark
-	uint8_t Calc;    // Calc Checksum if non-zero, else fill Checksum with Tag and Len.
-	uint8_t Seq;     // Packet sequence
+	uint8_t Cnt;     // Length count when parsing, if Len non-zero.
+	TLSLNKStatus Status;
+	
+	/* Packet protocol, must send in order as follow. */
+	uint8_t Mark;    // Head mark
+	uint8_t ResvA;   // Reserved, left to user to define,
+	uint8_t ResvB;   // for example as checksum.
+	uint8_t Seq;     // Sequence
 	uint8_t Sys;     // Sender system
 	uint8_t Dev;     // Sender device
 	uint8_t Tag;     // Tag
 	uint8_t Len;     // Length
 	uint8_t *ValPtr; // Value
-	uint16_t Checksum;
-}TLSLNKPacket_t;
-
-/**
- * @brief Data structure of TLSLink.
- *        It doesn't contain instance of TLSLNKPacket_t, whose use is up to implementer.
- *        Implementer can use one for sent and received, or two respectively.
- */	
-typedef struct 
-{
-	uint8_t Sys;        // Local system
-	uint8_t Dev;        // Local device
-	uint8_t SeqRcv;     // Sequence of last packet received
-	uint8_t SeqSend;    // Sequence of last packet sent
-	uint32_t NbrErr;    // Number of error packets
-	uint32_t NbrValid;  // Number of valid packets
-	uint8_t Cnt;        // Counter of length has got
-	TLSLNKFSMStatus FSM;
 }TLSLink_t;
 
 /**
  * @brief  Constructor for TLSLink.
  *         Memory allocated by malloc(), note configuration of Heap Size. 
- * @sys    Local system   
- * @dev    Local device
+ * @size   Max size of value
  * @return Reference to a new TLSLink
  */
 TLSLink_t *  
-newTLSLink(uint8_t sys, uint8_t dev);
+newTLSLink(uint8_t size);
 
 /**
  * @brief Destructor for TLSLink.
  *        Use free() to free memory allocated in newTLSLink().
- * @lnk   Pointer to a reference to TLSLink
+ * @pkt   Pointer to a reference to TLSLink
  */
 void  
 deleteTLSLink(TLSLink_t **lnk);
 
 /**
- * @brief  Constructor for TLSLNKPacket.
- *         Memory allocated by malloc(), note configuration of Heap Size. 
- * @size   Max size of value
- * @return Reference to a new TLSLNKPacket
+ * @brief Parse one byte with state machine according to packet protocol.
+ *        Only satisfy completeness, not correctness, left to user implement.
+ * @c     Byte caller supplied for parsing
+ * @lnk   TLSLink, packet parsed into, also record the status.
  */
-TLSLNKPacket_t *  
-newTLSLNKPacket(uint8_t size);
-
-/**
- * @brief Destructor for TLSLNKPacket.
- *        Use free() to free memory allocated in newTLSLNKPacket().
- * @pkt   Pointer to a reference to TLSLNKPacket
- */
-void  
-deleteTLSLNKPacket(TLSLNKPacket_t **pkt);
-
-/**
- * @brief  Pack sent packet.
- *         Assume message (Tag, Len, Val) already set.
- * @pkt    Sent packet to pack
- * @lnk    TLSLink 
- * @calc   Calc Checksum if non-zero, else fill Checksum with Tag and Len.
- * @return Packet size, limit to 0xFF.
- */
-uint8_t 
-TLSLNKPack(TLSLNKPacket_t *pkt, TLSLink_t *lnk, uint8_t calc);
-
-/**
- * @brief  Parse one byte with state machine according to packet protocol.
- *         Only satisfy completeness, not correctness.
- *         User should then call TLSLNKVerify() to verify Checksum.
- * @c      Byte caller supplied for parsing
- * @pkt    Packet parsed into
- * @lnk    TLSLink
- * @return 0 if complete packet parsed, else 1.
- */
-uint8_t 
-TLSLNKParse(uint8_t c, TLSLNKPacket_t *pkt, TLSLink_t *lnk);
-
-/**
- * @brief  Verify Checksum and update TLSLink after complete packet parsed
- * @pkt    Packet has been parsed to verify
- * @lnk    TLSLink
- * @return 1 if correct, else 0.
- */
-uint8_t
-TLSLNKVerify(TLSLNKPacket_t *pkt, TLSLink_t *lnk);
+void 
+TLSLNKParse(uint8_t c, TLSLink_t *lnk);
 
 #ifdef __cplusplus
   }
