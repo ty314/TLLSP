@@ -24,49 +24,26 @@
 	
 /* Includes */
 #include <stdint.h>
-		
-/**
- * @brief Macros of packet protocol
- */		
-#define TLSLNK_MARK 0x7E  // Head mark  
-
-/**
- * @brief Based on FSM, decompose parse into several stable status.
- */		
-typedef enum {
-	TLSLNK_STA_MARK = 0,
-	TLSLNK_STA_RESVA,
-	TLSLNK_STA_RESVB,
-	TLSLNK_STA_SEQ,
-	TLSLNK_STA_SYS,
-	TLSLNK_STA_DEV,
-	TLSLNK_STA_TAG,
-	TLSLNK_STA_LEN,
-	TLSLNK_STA_VAL,
 	
-	/* Got complete packet, do nothing until processed 
-	   and switch to TLSLNK_STA_MARK. */
-	TLSLNK_STA_FINISH
-}TLSLNKStatus;
+#define TLSLNK_MARK 0x7E // Head mark	
+/* Number of bytes in heads need to verify: Calc, Seq, Sys, Dev, Tag, Len */		
+#define TLSLNK_HEADS_VERIFY 6   		
 
 /**
- * @brief Data structure of TLSLink, as well as packet protocol.
+ * @brief Data structure of TLSLink, as well as protocol.
  */	
 typedef struct 
 {
-	uint8_t Cnt;     // Length count when parsing, if Len non-zero.
-	TLSLNKStatus Status;
-	
-	/* Packet protocol, must send in order as follow. */
-	uint8_t Mark;    // Head mark
-	uint8_t ResvA;   // Reserved, left to user to define,
-	uint8_t ResvB;   // for example as checksum.
-	uint8_t Seq;     // Sequence
-	uint8_t Sys;     // Sender system
-	uint8_t Dev;     // Sender device
-	uint8_t Tag;     // Tag
-	uint8_t Len;     // Length
-	uint8_t *ValPtr; // Value
+	/* Protocol, must send in order as follow. */
+	uint8_t Mark;       // Head mark
+	uint16_t Checksum;  // If Calc is non-zero, calc Checksum by Crc16/Modbus,	
+	uint8_t Calc;       // else just filled with Tag(High) and Len(Low).
+	uint8_t Seq;        // Sequence
+	uint8_t Sys;        // Sender system
+	uint8_t Dev;        // Sender device
+	uint8_t Tag;        // Tag
+	uint8_t Len;        // Length
+	uint8_t *ValPtr;    // Value
 }TLSLink_t;
 
 /**
@@ -87,13 +64,11 @@ void
 deleteTLSLink(TLSLink_t **lnk);
 
 /**
- * @brief Parse one byte with state machine according to packet protocol.
- *        Only satisfy completeness, not correctness, left to user implement.
- * @c     Byte caller supplied for parsing
- * @lnk   TLSLink, packet parsed into, also record the status.
+ * @brief  Calc Checksum by Crc16/Modbus, or just fill with Tag and Len.
+ * @return Checksum
  */
-void 
-TLSLNKParse(uint8_t c, TLSLink_t *lnk);
+uint16_t 
+TLSLNKCalc(TLSLink_t *lnk);
 
 #ifdef __cplusplus
   }
