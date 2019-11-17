@@ -28,7 +28,7 @@ typedef struct{
 	uint32_t Mask;  // Don't touch it! Used internally for wrapping. 
 	volatile uint32_t Head;
 	volatile uint32_t Tail;
-	uint8_t *BufPtr;	
+	uint8_t *Buf;	
 }TLSFifo_t;
 
 /**
