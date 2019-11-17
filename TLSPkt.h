@@ -25,7 +25,13 @@
 /* Includes */
 #include <stdint.h>
 	
-#define TLSPKT_MARK 0x7E // TLSPkt head mark	  		
+#define TLSPKT_MARK 0x7E // TLSPkt head mark
+#define TLSPKT_MAX_VAL_SIZE 246
+			
+typedef enum {
+	TLSPKT_MODE_HEX = 0,
+	TLSPKT_MODE_ASCII
+}TLSPktMode;			
 
 /**
  * @brief Data structure of TLSPkt, as well as protocol.
@@ -41,8 +47,11 @@ typedef struct
 	uint8_t Sys;   // System
 	uint8_t Dev;   // Device
 	uint8_t Tag;   // Tag
-	uint8_t Len;   // Length
+	uint8_t Len;   // Length, max is 246.
 	uint8_t *Val;  // Value
+	
+	/* Don't touch it! Used internally for parsing */
+	uint8_t Status;
 }TLSPkt_t;
 
 /**
@@ -61,6 +70,26 @@ newTLSPkt(uint8_t size);
  */
 void  
 deleteTLSPkt(TLSPkt_t **pkt);
+/**
+ * @brief Parse data user supplied into TLSPkt, one byte at a time.
+ *        Only satisfy completeness, not correctness.
+ * @return 0 if go smoothly, 1 means error occurred.
+ */
+uint8_t 
+TLSPktParse(uint8_t c, TLSPkt_t *pkt, TLSPktMode mode);
+
+/**
+ * @brief  Return whether TLSPkt is complete
+ * @return Non-zero if complete
+ */
+uint8_t
+TLSPktIsCplt(TLSPkt_t *pkt);
+
+/**
+ * @brief Clear complete flag of TLSPkt
+ */
+void
+TLSPktClrCplt(TLSPkt_t *pkt);
 
 #ifdef __cplusplus
   }
