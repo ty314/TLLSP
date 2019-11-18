@@ -40,6 +40,7 @@ typedef enum {
 
 /**
  * @brief Data structure of TLSPkt, as well as protocol.
+ *        In fact, except Mark and Len, all can be customized.
  */	
 typedef struct 
 {
