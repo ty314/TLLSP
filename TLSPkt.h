@@ -70,9 +70,11 @@ newTLSPkt(uint8_t size);
  */
 void  
 deleteTLSPkt(TLSPkt_t **pkt);
+	  
 /**
- * @brief Parse data user supplied into TLSPkt, one byte at a time.
- *        Only satisfy completeness, not correctness.
+ * @brief  Parse data user supplied into TLSPkt, one byte at a time.
+ *         Only satisfy completeness, not correctness.
+ *	   Note! Shouldn't call TLSPktParse() if TLSPkt is complete.
  * @return 0 if go smoothly, 1 means error occurred.
  */
 uint8_t 
