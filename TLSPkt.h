@@ -27,7 +27,12 @@
 	
 #define TLSPKT_MARK 0x7E // TLSPkt head mark
 #define TLSPKT_MAX_VAL_SIZE 246
-			
+
+/**
+ * @brief The only difference between Hex and ASCII is how the Len is parsed.
+ *        ASCII '6'(0x36) converted to Hex 0x06, 'F' to 0x0F, and so on.
+ *        Note! In ASCII mode, Len range is '0'-'9' and 'A'-'F', case-insensitive.
+ */		  
 typedef enum {
 	TLSPKT_MODE_HEX = 0,
 	TLSPKT_MODE_ASCII
