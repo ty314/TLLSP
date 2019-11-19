@@ -26,13 +26,15 @@
 #include <stdint.h>
 	
 #define TLSPKT_MARK 0x7E // TLSPkt head mark
-#define TLSPKT_MAX_VAL_SIZE 246
+#define TLSPKT_MAX_SIZE 255  // Fixed! Don't touch it.
+#define TLSPKT_MIN_SIZE 9  // Can insert or delete data between Mark and Len
+#define TLSPKT_MAX_VAL_SIZE (TLSPKT_MAX_SIZE - TLSPKT_MIN_SIZE)
 
 /**
  * @brief The only difference between Hex and ASCII is how the Len is parsed.
  *        ASCII '6'(0x36) converted to Hex 0x06, 'F' to 0x0F, and so on.
  *        Note! In ASCII mode, Len range is '0'-'9' and 'A'-'F', case-insensitive.
- */		  
+ */			
 typedef enum {
 	TLSPKT_MODE_HEX = 0,
 	TLSPKT_MODE_ASCII
@@ -41,7 +43,8 @@ typedef enum {
 /**
  * @brief Data structure of TLSPkt, as well as protocol.
  *        In fact, except Mark and Len, all can be customized.
- */	
+ *        User can insert or delete data between Mark and Len by TLSPKT_MIN_SIZE.
+ */
 typedef struct 
 {
 	/* Protocol, must send in order as follow. */
@@ -53,7 +56,7 @@ typedef struct
 	uint8_t Sys;   // System
 	uint8_t Dev;   // Device
 	uint8_t Tag;   // Tag
-	uint8_t Len;   // Length, max is 246.
+	uint8_t Len;   // Length
 	uint8_t *Val;  // Value
 	
 	/* Don't touch it! Used internally for parsing */
@@ -76,11 +79,11 @@ newTLSPkt(uint8_t size);
  */
 void  
 deleteTLSPkt(TLSPkt_t **pkt);
-	  
+
 /**
  * @brief  Parse data user supplied into TLSPkt, one byte at a time.
  *         Only satisfy completeness, not correctness.
- *	   Note! Shouldn't call TLSPktParse() if TLSPkt is complete,
+ *				 Note! Shouldn't call TLSPktParse() if TLSPkt is complete,
  *         otherwise the byte supplied will be discarded.
  * @return 0 if go smoothly, 1 means error occurred.
  */
