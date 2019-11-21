@@ -6,7 +6,7 @@
  * @author  LL.T
  * @version 1.0.0
  * @date    2018/06/01
- * @brief		To optimize, use linked list instead.
+ * @brief   To optimize, use linked list instead.
  */
 
 /* Define to prevent recursive inclusion */
