@@ -56,7 +56,7 @@ deleteTLPLink(TLPLink_t **lnk);
 /**
  * @brief Process frame for comm using pattern TLPLink.
  *        Decode is done by frame;
- *        Business left to user called by fun ptr (*Proc)().
+ *        Business left to user called by fun ptr (*Proc)() in TLPLink.
  */
 void
 TLPLnkProc(TLPLink_t *lnk);
