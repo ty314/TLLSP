@@ -53,6 +53,13 @@ TLSTimDly(uint32_t (*cnt)(), TLSTimType udly);
  */
 uint8_t
 TLSTimIsDlyUp(void *timer, TLSTimType udly);
+	  
+/**
+ * @brief Reset TLSTim, in case of termination in half.
+ * @timer Instance of TLSTimer
+ */
+void
+TLSTimReset(void *timer);
 
 /**
  * @brief Interrupt Service Routine.
